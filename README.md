@@ -1,2 +1,2 @@
-# bechatted-server
+# BeChatted Server
 Server for `BeChatted` clients
