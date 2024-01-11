@@ -1,3 +1,7 @@
-fn main() {
+use actix_web;
+
+#[actix_web::main]
+async fn main() {
     println!("Hello, world!");
 }
+
