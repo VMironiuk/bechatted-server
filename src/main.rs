@@ -1,4 +1,4 @@
-use actix_web::{post, web, App, HttpServer};
+use actix_web::{post, web, App, HttpResponse, HttpServer, Responder};
 use serde::Deserialize;
 use std::sync::Mutex;
 
@@ -38,11 +38,22 @@ struct AccountRepository {
 }
 
 #[post("/account/register")]
-async fn register_account(new_account_info: web::Json<NewAccountInfo>, data: web::Data<AccountRepository>) -> String {
+async fn register_account(
+    new_account_info: web::Json<NewAccountInfo>,
+    data: web::Data<AccountRepository>
+) -> impl Responder {
     let mut accounts = data.accounts.lock().unwrap();
+
+    if accounts.iter().any(|e| e._email == new_account_info.email) {
+        let message = format!("Email {} already exists", new_account_info.email);
+        return HttpResponse::Conflict().body(message)
+    }
+
     accounts.push(Account {
         _email: new_account_info.email.clone(),
         _password: new_account_info.password.clone()
     });
-    format!("Accounts Number: {}\nAccounts, {:#?}", accounts.len(), accounts)
+
+    let message = format!("Successfully created new account.\nAccounts Number: {}\nAccounts, {:#?}", accounts.len(), accounts);
+    HttpResponse::Ok().body(message)
 }
